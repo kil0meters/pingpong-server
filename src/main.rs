@@ -1,10 +1,12 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
 #[macro_use] extern crate rocket;
+extern crate rocket_contrib;
 extern crate serde;
 extern crate serde_json;
 
-use rocket::{State, StaticFiles};
+use rocket::State;
+use rocket_contrib::serve::StaticFiles;
 use serde::{Deserialize, Serialize};
 
 // extern crate sysfs_gpio;
@@ -57,6 +59,11 @@ fn set_topspin(frequency: usize, state: State<PingPongState>) -> String {
     serde_json::to_string(state.inner()).unwrap()
 }
 
+#[get("/get-state")]
+fn get_state(state: State<PingPongState>) -> String {
+    serde_json::to_string(state.inner()).unwrap()
+}
+
 fn main() {
     let machine_state = PingPongState {
         firing_speed: AtomicUsize::new(0),
@@ -71,6 +78,7 @@ fn main() {
         .mount("/api/v1/", routes![set_oscillation_frequency])
         .mount("/api/v1/", routes![set_backspin])
         .mount("/api/v1/", routes![set_topspin])
+        .mount("/api/v1/", routes![get_state])
         .manage(machine_state)
         .launch();
 }
