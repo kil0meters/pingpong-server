@@ -2,3 +2,9 @@
 **/*.rs.bk
 */node_modules
 */yarn.lock
+venv/
+lib/
+include/
+bin/
+*.db
+.Python
