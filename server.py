@@ -74,6 +74,12 @@ def setPin(pinName, value):
     else:
         raise(InvalidData('value not in range(0, 256)'))
 
+def setArduinoToMachineState():
+    setPin('firingSpeed', machineState['firingSpeed'])
+    setPin('oscillationSpeed', machineState['oscillationSpeed'])
+    setPin('topspin', machineState['topspin'])
+    setPin('backspin', machineState['backspin'])
+
 @app.route('/api/v1/set-firing-speed/<value>', methods=['GET'])
 def setFiringSpeed(value):
     return setPin('firingSpeed', value)
@@ -169,11 +175,19 @@ def setMachineStateToPreset(presetUUID):
         machineState['topspin'] = result[4]
         machineState['backspin'] = result[5]
 
+        setArduinoToMachineState()
+
         return jsonify(machineState)
 
 @app.route('/api/v1/toggle-firing-state', methods=['GET'])
 def setFiringState():
     machineState['firingState'] = not machineState['firingState']
+
+    setPin('firingSpeed', 0)
+    setPin('oscillationSpeed', 0)
+    setPin('topspin', 0)
+    setPin('backspin', 0)
+
     return 'success'
 
 @app.route('/api/v1/get-firing-state', methods=['GET'])
