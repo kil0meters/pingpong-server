@@ -8,7 +8,14 @@ import uuid
 import time
 import os
 
-if os.environ['DEBUG'] != 'true':
+debug = False
+try:
+    _tmp = os.environ['DEBUG']
+    debug = True
+except:
+    pass
+
+if debug != True:
     ser = serial.Serial('/dev/ttyACM0', 9600)
 
 db = sqlite3.connect('drills.db')
@@ -27,7 +34,7 @@ machineState = {
         }
 
 def arduino_write(byte_array):
-    if os.environ['DEBUG'] != 'true':
+    if debug != True:
         ser.write(byte_array)
 
 class InvalidData(Exception):
@@ -177,7 +184,7 @@ def getFiringState():
         return 'false'
 
 if __name__ == '__main__':
-    if os.environ['DEBUG'] == 'true':
+    if debug == True:
         app.run(host='127.0.0.1', port=8080)
     else:
         app.run(host='0.0.0.0', port=8080)
