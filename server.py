@@ -100,7 +100,7 @@ def savePreset():
 
         preset = (preset_uuid, _name, _firingSpeed, _oscillationSpeed, _topspin, _backspin)
     except:
-        raise InvalidData('did not find all required arguments: firingSpeed, oscillationSpeed, topspin, backspin')
+        raise InvalidData('did not find all required arguments: name, firingSpeed, oscillationSpeed, topspin, backspin')
 
     try: 
         with sqlite3.connect('drills.db') as conn:
@@ -115,13 +115,19 @@ def savePreset():
         conn.close()
         raise InvalidData('could not add preset to database')
 
-@app.route('/api/v1/remove-preset/<uuid>', methods=['GET'])
-def removePreset(preset_uuid):
+@app.route('/api/v1/remove-preset/<presetUUID>', methods=['GET'])
+def removePreset(presetUUID):
     try:
-        val = uuid.UUID(preset_uuid, version=4)
+        val = uuid.UUID(presetUUID, version=4)
     except:
         raise InvalidData('Invalid UUID format') 
-    db.execute('delete from RemotePresets where id = ?', uuid)
+
+    with sqlite3.connect('drills.db') as conn:
+        cur = conn.cursor()
+        cur.execute('delete from RemotePresets where id=?', (presetUUID,))
+        conn.commit()
+    
+    return jsonify({'message': 'successfully removed preset: {}'.format(presetUUID)})
 
 @app.route('/api/v1/list-remote-presets', methods=['GET'])
 def listRemotePresets():
@@ -130,6 +136,33 @@ def listRemotePresets():
         cur.execute('select * from RemotePresets')
         conn.commit()
         return jsonify(cur.fetchall())
+
+@app.route('/api/v1/set-machine-state-to-preset/<presetUUID>')
+def setMachineStateToPreset(presetUUID):
+    try:
+        _tmp = uuid.UUID(presetUUID, version = 4)
+    except:
+        raise InvalidData('Invalid UUID')
+
+    with sqlite3.connect('drills.db') as conn:
+        cur = conn.cursor()
+        cur.execute('select * from RemotePresets where id=?', (presetUUID,))
+        conn.commit()
+
+        result = cur.fetchone()
+
+        if result == None:
+            conn.rollback()
+            conn.close()
+            raise InvalidData('could not find preset with specified UUID')
+
+        # format: id, name, firingSpeed, oscillationSpeed, topspin, backspin
+        machineState['firingSpeed'] = result[2]
+        machineState['oscillationSpeed'] = result[3]
+        machineState['topspin'] = result[4]
+        machineState['backspin'] = result[5]
+
+        return jsonify(machineState)
 
 @app.route('/api/v1/toggle-firing-state', methods=['GET'])
 def setFiringState():
