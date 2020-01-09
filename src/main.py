@@ -56,10 +56,11 @@ def handle_invalid_data(error):
     response.status_code = error.status_code
     return response
 
-def setPin(pinName, value):
+def setPin(pinName, value, writeToState=True):
     value = int(value)
     if value in range(0, 256):
-        machineState[pinName] = value
+        if writeToState == True:
+            machineState[pinName] = value
         if pinName == 'firingSpeed':
             arduino_write(bytes([1, value])) # ord('R') = 82
         if pinName == 'oscillationSpeed':
@@ -104,10 +105,10 @@ def setFiringState():
         setPin('topspin', machineState['topspin'])
         setPin('backspin', machineState['backspin'])
     else:
-        setPin('firingSpeed', 0)
-        setPin('oscillationSpeed', 0)
-        setPin('topspin', 0)
-        setPin('backspin', 0)
+        setPin('firingSpeed', 0, writeToState=False)
+        setPin('oscillationSpeed', 0, writeToState=False)
+        setPin('topspin', 0, writeToState=False)
+        setPin('backspin', 0, writeToState=False)
 
     return 'success'
 
