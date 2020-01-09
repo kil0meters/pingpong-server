@@ -1,11 +1,11 @@
 import uuid
 import sqlite3
 
-from flask import Flask, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 
-from main import app, setPin, setArduinoToMachineState
+remote_presets_api = Blueprint('remote_presets_api', __name__)
 
-@app.route('/api/v1/add-preset', methods=['GET'])
+@remote_presets_api.route('/api/v1/add-preset', methods=['GET'])
 def savePreset():
     try:
         preset_uuid = str(uuid.uuid4())
@@ -33,7 +33,7 @@ def savePreset():
         conn.close()
         raise InvalidData('could not add preset to database')
 
-@app.route('/api/v1/remove-preset/<presetUUID>', methods=['GET'])
+@remote_presets_api.route('/api/v1/remove-preset/<presetUUID>', methods=['GET'])
 def removePreset(presetUUID):
     try:
         val = uuid.UUID(presetUUID, version=4)
@@ -47,7 +47,7 @@ def removePreset(presetUUID):
     
     return jsonify({'message': 'successfully removed preset: {}'.format(presetUUID)})
 
-@app.route('/api/v1/list-remote-presets', methods=['GET'])
+@remote_presets_api.route('/api/v1/list-remote-presets', methods=['GET'])
 def listRemotePresets():
     with sqlite3.connect('drills.db') as conn:
         cur = conn.cursor()
@@ -55,8 +55,10 @@ def listRemotePresets():
         conn.commit()
         return jsonify(cur.fetchall())
 
-@app.route('/api/v1/set-machine-state-to-preset/<presetUUID>')
+@remote_presets_api.route('/api/v1/set-machine-state-to-preset/<presetUUID>')
 def setMachineStateToPreset(presetUUID):
+    machineState = current_app.config['machineState']
+
     try:
         _tmp = uuid.UUID(presetUUID, version = 4)
     except:
@@ -75,11 +77,9 @@ def setMachineStateToPreset(presetUUID):
             raise InvalidData('could not find preset with specified UUID')
 
         # format: id, name, firingSpeed, oscillationSpeed, topspin, backspin
-        machineState['firingSpeed'] = result[2]
-        machineState['oscillationSpeed'] = result[3]
-        machineState['topspin'] = result[4]
-        machineState['backspin'] = result[5]
+        machineState.setFiringSpeed(result[2])
+        machineState.setOscillationSpeed(result[3])
+        machineState.setTopspin(result[4])
+        machineState.setBackspin(result[5])
 
-        setArduinoToMachineState()
-
-        return jsonify(machineState)
+        return jsonify(machineState.machineState)
