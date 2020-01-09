@@ -6,5 +6,6 @@ venv/
 lib/
 include/
 bin/
+__pycache__/
 *.db
 .Python

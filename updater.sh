@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cd /home/pi/pingpong_server
+cd /home/pi/pingpong-server
 git pull

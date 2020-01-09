@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cd /home/pi/pingpong_server
-./bin/python3 server.py
+cd /home/pi/pingpong-server
+./bin/python3 src/main.py
