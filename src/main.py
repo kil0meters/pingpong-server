@@ -94,6 +94,31 @@ def setTopspin(value):
 def setBackspin(value):
     return setPin('backspin', value)
 
+@app.route('/api/v1/toggle-firing-state', methods=['GET'])
+def setFiringState():
+    machineState['firingState'] = not machineState['firingState']
+
+    if machineState['firingState'] == True:
+        setPin('firingSpeed', machineState['firingSpeed'])
+        setPin('oscillationSpeed', machineState['oscillationSpeed'])
+        setPin('topspin', machineState['topspin'])
+        setPin('backspin', machineState['backspin'])
+    else:
+        setPin('firingSpeed', 0)
+        setPin('oscillationSpeed', 0)
+        setPin('topspin', 0)
+        setPin('backspin', 0)
+
+    return 'success'
+
+@app.route('/api/v1/get-firing-state', methods=['GET'])
+def getFiringState():
+    if machineState['firingState'] == True:
+        return 'true'
+    else:
+        return 'false'
+
+
 @app.route('/api/v1/get-machine-state', methods=['GET'])
 def getMachineState():
     return jsonify(machineState)

@@ -3,7 +3,7 @@ import sqlite3
 
 from flask import Flask, jsonify, request
 
-from main import app
+from main import app, setPin, setArduinoToMachineState
 
 @app.route('/api/v1/add-preset', methods=['GET'])
 def savePreset():
@@ -83,22 +83,3 @@ def setMachineStateToPreset(presetUUID):
         setArduinoToMachineState()
 
         return jsonify(machineState)
-
-@app.route('/api/v1/toggle-firing-state', methods=['GET'])
-def setFiringState():
-    machineState['firingState'] = not machineState['firingState']
-
-    setPin('firingSpeed', 0)
-    setPin('oscillationSpeed', 0)
-    setPin('topspin', 0)
-    setPin('backspin', 0)
-
-    return 'success'
-
-@app.route('/api/v1/get-firing-state', methods=['GET'])
-def getFiringState():
-    if machineState['firingState'] == True:
-        return 'true'
-    else:
-        return 'false'
-
