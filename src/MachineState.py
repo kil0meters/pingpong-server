@@ -1,8 +1,8 @@
-from flask import jsonify
+from flask import jsonify, current_app
 
 def arduino_write(debug, byte_array):
-    if debug != True:
-        ser.write(byte_array)
+    if debug == False:
+        current_app.config['ser'].write(byte_array)
 
 class MachineState():
     def __init__(self, debug=False):
