@@ -29,7 +29,6 @@ def getFiringState():
     else:
         return 'false'
 
-
 @machine_controls_api.route('/api/v1/get-machine-state', methods=['GET'])
 def getMachineState():
     return jsonify(current_app.config['machineState'].machineState)

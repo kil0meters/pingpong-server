@@ -13,6 +13,7 @@ import AutomaticDrills
 from MachineState import MachineState
 from RemotePresets import remote_presets_api
 from MachineControls import machine_controls_api
+from AutomaticDrills import automatic_drills_api
 from Errors import InvalidData, error_blueprint
 
 if __name__ == '__main__':
@@ -31,16 +32,18 @@ if __name__ == '__main__':
             '(id STRING PRIMARY KEY, name STRING, firingSpeed INTEGER, oscillationSpeed INTEGER, topspin INTEGER, backspin INTEGER)')
 
     db.execute('create table if not exists AutomaticDrills'
-                '(id STRING PRIMARY KEY, name STRING, description STRING,'
-                'firingSpeedMin INTEGER, firingSpeedMax INTEGER,'
-                'oscillationSpeedMin INTEGER, oscillationSpeedMax INTEGER,'
-                'topspinMin INTEGER, topspinMax INTEGER)')
+                '(id STRING PRIMARY KEY, listIndex INTEGER, name STRING, description STRING,'
+                'firingSpeedMin INTEGER, firingSpeedMax INTEGER, firingSpeedFactor INTEGER,' 
+                'oscillationSpeedMin INTEGER, oscillationSpeedMax INTEGER, oscillationSpeedFactor INTEGER,'
+                'topspinMin INTEGER, topspinMax INTEGER, topspinFactor INTEGER,'
+                'backspinMin INTEGER, backspinMax INTEGER, backspinFactor INTEGER)')
 
     db.close()
 
     app = Flask(__name__)
     app.register_blueprint(remote_presets_api)
     app.register_blueprint(machine_controls_api)
+    app.register_blueprint(automatic_drills_api)
     app.register_blueprint(error_blueprint)
 
     app.config['machineState'] = MachineState(debug=debug)
